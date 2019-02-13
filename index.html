@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>dropdown & upload</title>
+    <style>
+        .scroll {
+            overflow-y: scroll;
+        }
+
+        .scroll__item {
+            font-size: 24px;
+            margin: 15px;
+            border-bottom: 1px solid #e1e1e1;
+        }
+
+        .scroll-loader p {
+            vertical-align: middle;
+            font-size: 14px;
+            text-align: center;
+
+        }
+
+        .icon__loading {
+            display: inline-block;
+            height: 20px;
+            width: 20px;
+            background: url("./loading.png") no-repeat;
+            -webkit-background-size: 100% 100%;
+            background-size: 100% 100%;
+            vertical-align: middle;
+            animation: rotation__icon--nostop infinite linear 2s;
+
+        }
+
+        @keyframes rotation__icon--nostop {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .toptop{
+            height: 200px;
+        }
+    </style>
+</head>
+<body>
+<div class="toptop"></div>
+<div id="app">
+    <my-scroll :on-reach-bottom="handleReachBottom" :on-reach-top="handleReachTop">
+        <div class="scroll__item" v-for="(item, index) in list" :key="index">
+            content {{item}}
+        </div>
+    </my-scroll>
+</div>
+</body>
+<script src="https://cdn.jsdelivr.net/npm/vue"></script>
+<script>
+    Vue.component("loader", {
+        props: {
+            active: {type: Boolean}
+        },
+        template: `<div v-show="active" class="scroll-loader"><p><span class="icon__loading"></span><slot></slot></p></div>`
+    })
+    Vue.component('my-scroll', {
+        props: {
+            onReachTop: {type: Function},
+            onReachBottom: {type: Function},
+            height: {type: [Number, String], default: 300},
+
+        },
+        data() {
+            return {
+                isLoading: false,
+                showTopLoader: false,
+                showBottomLoader: false,
+                lastScroll: 0,
+                pointerDownY: 0
+            }
+        },
+        template: ` <div class="scroll"
+            @scroll="onScroll"
+            @touchstart="onPointerDown"
+            ref = "scrollContainer"
+            :style="{height: height + 'px'}"
+        >
+            <div  ref="toploader">
+                <loader :active="showTopLoader"> 刷新中...</loader>
+            </div>
+            <div  ref="scrollContent">
+                <slot></slot>
+            </div>
+            <div ref="bottomLoader">
+                <loader :active="showBottomLoader"> 加载中...</loader>
+            </div>`,
+        methods: {
+            onScroll(e, direction) {
+                const el = this.$refs.scrollContainer;
+                if (this.isLoading || !el) return;
+                const scrollDirection = Math.sign(this.lastScroll - el.scrollTop);
+                const displacement = el.scrollHeight - el.clientHeight - el.scrollTop;
+                const scrollTop = el.scrollTop;
+                if(direction && direction < 0 && scrollTop <=0){
+                    this.showTopLoader = true
+                    this.isLoading = true;
+                    this.onReachTop().then(_ => {
+                        this.showTopLoader = false
+                        this.isLoading = false;
+                    })
+
+                }
+                if (displacement <= 0) {
+                    this.showBottomLoader = true
+                    this.isLoading = true;
+                    this.onReachBottom().then(_ => {
+                        this.showBottomLoader = false
+                        this.isLoading = false;
+                    })
+                }
+            },
+            stretchEdge(e,direction){
+                this.onScroll(e,direction)
+            }
+            ,
+            onPointerDown(e) {
+                if (this.isLoading) return;
+                this.pointerDownY = e.touches[0].clientY;
+                this.$refs.scrollContainer.parentElement.addEventListener('touchmove', e => {
+                    e.stopPropagation();
+                    this.onPointerMove(e);
+                }, {passive: false, useCapture: true});
+            },
+            onPointerMove(e) {
+                let direction = Math.sign(this.pointerDownY - e.touches[0].clientY)
+                this.stretchEdge(e,direction)
+            },
+            onPointerUp() {
+                this.pointerDownY = undefined;
+            }
+        }
+    });
+    new Vue({
+        el: '#app',
+        data() {
+            return {
+                list: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+            }
+        },
+        methods: {
+            handleReachBottom() {
+                return new Promise(resolve => {
+                    setTimeout(() => {
+                        const last = this.list[this.list.length - 1];
+                        for (let i = 1; i < 11; i++) {
+                            this.list.push(last + i);
+                        }
+                        resolve(100);
+                    }, 2000);
+                });
+            },
+            handleReachTop(){
+                return new Promise(resolve => {
+                    setTimeout(() => {
+                            this.list = [1,2,3,4,5,6,7,8,9,10]
+                        resolve(100);
+                    }, 2000);
+                });
+            }
+        }
+    })
+</script>
+</html>
