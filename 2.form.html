@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>form</title>
+    <style>
+        *{
+            -webkit-box-sizing: border-box;
+            -moz-box-sizing: border-box;
+            box-sizing: border-box;
+        }
+         .error__msg::after{
+            color: red;
+            display: inline-block;
+            font-size: 12px;
+            content: attr(data-error-msg);
+        }
+
+        .container{
+            width: 720px;
+            margin: 0 auto;
+        }
+        .label{
+            margin: 15px;
+            font-size: 16px;
+        }
+        .label .name{
+            text-align: right;
+            display: block;
+            float: left;
+            width: 110px;
+            font-size: 14px;
+        }
+        .label .right{
+            display: block;
+            width: 240px;
+            line-height: 2;
+            margin-left: 120px;
+        }
+
+        button{
+            margin: 15px;
+            width: 120px;
+            height: 24px;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="research container">
+    <div class="label">
+        <span  class="name">调查名称</span>
+        <input class="right" type="text" data-bind="name" class="label__input" placeholder="调查名称格式：创建人姓名-调查名称"/>
+    </div>
+    <div class="label">
+        <span class="name">调查负责人</span>
+        <input  class="right" type="text" data-bind="manager" class="label__input" placeholder="负责人名称，不能为空">
+    </div>
+    <div class="label">
+        <span class="name">调查联系人</span>
+        <input class="right" type="text" data-bind="concatPeople" class="label__input" placeholder="联系人名称，可以为空">
+    </div>
+    <div class="label">
+        <span class="name">被调查企业账号</span>
+        <label class="right">
+            <input type="radio" data-bind="isPreResearch" name="isPreResearch" value="1">是
+            <input type="radio" data-bind="isPreResearch" name="isPreResearch" value="0">否
+        </label>
+    </div>
+    <div class="label">
+        <span class="name">被调查企业账号</span>
+        <textarea class="right" type="text" data-bind="enterpriseIds" class="label__input"
+                  placeholder="企业账号之间以英文逗号分割，如234,789，不能为空"></textarea>
+    </div>
+    <div class="label">
+        <span class="name">调查摘要</span>
+        <textarea class="right" type="text" data-bind="desc" class="label__input" placeholder="可以为空"></textarea>
+    </div>
+    <button id="create">创建</button>
+    <button id="clear">clear</button>
+</div>
+
+</body>
+</html>
+<script>
+
+    function ruleCantEmpty(key,val,ele){
+        if (/^\s*$/.test(val) || val === "") {
+            ele.parentNode.setAttribute("data-error-msg", key+" 值不能为空")
+            ele.parentNode.className = ele.parentNode.className += " error__msg";
+            return false
+        }
+        ele.parentNode.removeAttribute("data-error-msg")
+        return true
+    }
+
+    let data = {
+        name: {
+            val: "",
+            rules: [ruleCantEmpty,function (key,val,ele) {
+                if (/.+-.+/.test(val) || val === "") {
+                    ele.parentNode.removeAttribute("data-error-msg")
+                    return true
+                }else{
+                    ele.parentNode.setAttribute("data-error-msg", ele.placeholder)
+                    ele.parentNode.className = ele.parentNode.className += " error__msg";
+                    return false
+                }
+            }
+            ]
+        },
+        manager: {
+            val: "",
+            rules:[ruleCantEmpty]
+        },
+        concatPeople: {
+            val: "",
+            rules: []
+        },
+        isPreResearch: {
+            val: "",
+            rules: [function (key, val, ele) {
+                if(val === true || val === false){
+                    ele.parentNode.removeAttribute("data-error-msg")
+                    return true
+                }else{
+                    ele.parentNode.setAttribute("data-error-msg", "请选择是否预调研")
+                    ele.parentNode.className = ele.parentNode.className += " error__msg";
+                }
+                return true
+            }]
+        },
+        enterpriseIds: {
+            val: "",
+            rules: [ruleCantEmpty,function (key, val, ele) {
+                if(/^(\d+(,?))+$/.test(val)){
+                    this.data[key].val =  val.split(",").map(item=>Number(item))
+                    ele.parentNode.removeAttribute("data-error-msg")
+                    return true
+                }else{
+                    ele.parentNode.setAttribute("data-error-msg", ele.placeholder)
+                    ele.parentNode.className = ele.parentNode.className += " error__msg";
+                    return false
+                }
+            }]
+        },
+        desc: {
+            val: "",
+            rules: []
+        }
+    };
+
+
+    class Data2Dom {
+        constructor(query, data) {
+            this.data = data;
+            this.query = query;
+            this.elementResearch = document.querySelector(query);
+            this.elementsWithData = this.getElementsByAttribute(this.elementResearch, 'data-bind');
+            this.keysData2Elements = [];
+            this.init()
+        }
+
+        init() {
+            for (let key in this.data) {
+                let ele = this.elementsWithData[key];
+                if (ele) {
+                    if (Array.isArray(ele)) {
+                        ele.forEach(el => {
+                            this.bindEvent(el, this.data[key]);
+                        })
+                    } else {
+                        this.bindEvent(ele, this.data[key]);
+                    }
+                    this.keysData2Elements.push(key);
+                }
+            }
+        }
+
+        getElementsByAttribute(dom, attribute) {
+            let elements = {};
+            Array.from(dom.querySelectorAll("*")).forEach(ele => {
+                let val = ele.getAttribute(attribute);
+                if (val) {
+                    if (elements[val]) {
+                        Array.isArray(elements[val]) ? elements[val].push(ele) : (elements[val] = [elements[val], ele])
+                    } else {
+                        elements[val] = ele
+                    }
+                }
+            });
+            return elements;
+        }
+
+        bindEvent(ele, opt) {
+            const tagName = ele.tagName;
+            let that = this;
+            if (tagName === "INPUT" || tagName === "TEXTAREA") {
+                ele.addEventListener("change", e => {
+                    if (ele.type === "radio") {
+                        opt.val = (e.target.value === "1" ? true : false);
+                    } else {
+                        opt.val = e.target.value;
+                    }
+                })
+            }
+
+        }
+
+        clearAllValue() {
+            this.keysData2Elements.forEach(key => {
+                let ele = d2d.elementsWithData[key];
+                data[key].val = ""
+                if (Array.isArray(ele)) {
+                    ele.forEach(el => {
+                        (el.type === "radio") && (el.checked = false);
+                        el.parentNode.className =".label"
+                    })
+                } else {
+                    ele.value = ""
+                    ele.parentNode.className =".label"
+                }
+
+            })
+        }
+
+        verifyData() {
+            let res = true;
+            for (let key in this.data) {
+                let val = this.data[key].val,
+                    rules = this.data[key].rules
+                if (!rules || rules.length === 0) continue;
+                for (let i = 0; i < rules.length; ++i) {
+                    let cb = rules[i], isPassed = true;
+                    if (cb instanceof Function) {
+                        let ele  = this.elementsWithData[key]
+                        if(Array.isArray(ele)){
+                            ele.forEach(el=>{
+                                isPassed = cb.call(this,key, val, el);
+                            })
+                        }else{
+                            isPassed = cb.call(this,key, val, ele);
+                        }
+                    } else if (!!cb) {
+                        throw ("rules[] 为函数数组")
+                    }
+                    if (!isPassed) {
+                        res = isPassed;
+                        break;
+                    }
+                }
+            }
+            return res;
+        }
+
+        consoleData(){
+            let d = {}
+            for(let key in this.data){
+                d[key] = this.data[key].val;
+            }
+            console.log(d);
+        }
+    }
+
+    let d2d = new Data2Dom(".research", data);
+    document.querySelector("#clear").onclick = function () {
+        d2d.clearAllValue()
+    }
+    document.querySelector("#create").onclick = function () {
+        if (d2d.verifyData()){
+            d2d.consoleData()
+        }
+    }
+
+</script>
