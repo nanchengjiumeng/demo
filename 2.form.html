@@ -12,11 +12,16 @@
             box-sizing: border-box;
         }
          .error__msg::after{
+             margin-left: 120px;
             color: red;
             display: inline-block;
             font-size: 12px;
             content: attr(data-error-msg);
         }
+         label.error__msg::after{
+             margin-left: 0;
+         }
+
 
         .container{
             width: 720px;
@@ -217,11 +222,9 @@
                 if (Array.isArray(ele)) {
                     ele.forEach(el => {
                         (el.type === "radio") && (el.checked = false);
-                        el.parentNode.className =".label"
                     })
                 } else {
                     ele.value = ""
-                    ele.parentNode.className =".label"
                 }
 
             })
