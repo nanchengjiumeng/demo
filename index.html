@@ -1,177 +1,133 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>dropdown & upload</title>
+    <title>active</title>
     <style>
-        .scroll {
-            overflow-y: scroll;
+        html,
+        body {
+            margin: 0;
+            padding: 0;
         }
 
-        .scroll__item {
-            font-size: 24px;
-            margin: 15px;
-            border-bottom: 1px solid #e1e1e1;
+        body {
+            padding-bottom: 60px;
         }
 
-        .scroll-loader p {
-            vertical-align: middle;
-            font-size: 14px;
+        img {
+            width: 100%;
+            border: none;
+            display: block;
+        }
+
+        .container {
+            margin: 0 auto;
+            width: 100%;
+            max-width: 720px;
+        }
+
+        .page--section {
+            width: 100%;
+        }
+
+        .write--exp {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+        }
+
+        .write--exp .write--exp__btn {
+            display: block;
+            margin: 0 auto;
+            height: 60px;
+            line-height: 60px;
+            max-width: 720px;
+            background: linear-gradient(90deg, rgba(255, 123, 157, 1) 0%, rgba(160, 78, 255, 1) 100%);
+            font-size: 18px;
+            font-family: PingFang-SC-Bold;
+            font-weight: bold;
+            color: rgba(255, 255, 255, 1);
             text-align: center;
-
         }
-
-        .icon__loading {
-            display: inline-block;
-            height: 20px;
-            width: 20px;
-            background: url("./loading.png") no-repeat;
-            -webkit-background-size: 100% 100%;
-            background-size: 100% 100%;
-            vertical-align: middle;
-            animation: rotation__icon--nostop infinite linear 2s;
-
+        .dialog {
+        position: fixed;
+        top: 0;
+        left: 0;
+        transition: all ease-in 2s;
+    }
+    .dialog-bg {
+        height: 100%;
+        width: 100%;
+        background: rgba(32, 38, 54, .8);
+        animation: fadeIn .2s linear;
+        z-index: 9999;
+    }
+    @keyframes fadeIn {
+        0% {
+            opacity: 0;
         }
-
-        @keyframes rotation__icon--nostop {
-            from {
-                transform: rotate(0deg);
-            }
-            to {
-                transform: rotate(360deg);
-            }
+        100% {
+            opacity: 1;
         }
-
-        .toptop{
-            height: 200px;
+    }
+    @keyframes fadeOut {
+        0% {
+            opacity: 1;
         }
+        100% {
+            opacity: 0;
+        }
+    }
+    .dialog .to-browser {
+        position: absolute;
+        right: 0;
+        top: 0;
+        margin: 40px 80px;
+        width: 200px;
+    }
     </style>
 </head>
+
 <body>
-<div class="toptop"></div>
-<div id="app">
-    <my-scroll :on-reach-bottom="handleReachBottom" :on-reach-top="handleReachTop">
-        <div class="scroll__item" v-for="(item, index) in list" :key="index">
-            content {{item}}
-        </div>
-    </my-scroll>
-</div>
+    <div class="container">
+        <section class="page--section">
+            <img src="http://official-web.oss-cn-beijing.aliyuncs.com/towords/pages/newSemesterActivity/20190226/1.png"
+                alt="开学季">
+        </section>
+        <section class="page--section">
+            <img src="http://official-web.oss-cn-beijing.aliyuncs.com/towords/pages/newSemesterActivity/20190226/2.png"
+                alt="开学季">
+        </section>
+        <section class="page--section">
+            <img src="http://official-web.oss-cn-beijing.aliyuncs.com/towords/pages/newSemesterActivity/20190226/3.png"
+                alt="开学季">
+        </section>
+        <section class="page--section">
+            <img src="http://official-web.oss-cn-beijing.aliyuncs.com/towords/pages/newSemesterActivity/20190226/4.png"
+                alt="开学季">
+        </section>
+        <section class="page--section">
+            <img src="http://official-web.oss-cn-beijing.aliyuncs.com/towords/pages/newSemesterActivity/20190226/5.png"
+                alt="开学季">
+        </section>
+        <section class="page--section">
+            <img src="http://official-web.oss-cn-beijing.aliyuncs.com/towords/pages/newSemesterActivity/20190226/6.png"
+                alt="开学季">
+        </section>
+        <section class="page--section">
+            <img src="http://official-web.oss-cn-beijing.aliyuncs.com/towords/pages/newSemesterActivity/20190226/7.png"
+                alt="开学季">
+        </section>
+    </div>
+    <div class="write--exp">
+        <span class="write--exp__btn">写心得</span>
+    </div>
 </body>
-<script src="https://cdn.jsdelivr.net/npm/vue"></script>
-<script>
-    Vue.component("loader", {
-        props: {
-            active: {type: Boolean}
-        },
-        template: `<div v-show="active" class="scroll-loader"><p><span class="icon__loading"></span><slot></slot></p></div>`
-    })
-    Vue.component('my-scroll', {
-        props: {
-            onReachTop: {type: Function},
-            onReachBottom: {type: Function},
-            height: {type: [Number, String], default: 300},
 
-        },
-        data() {
-            return {
-                isLoading: false,
-                showTopLoader: false,
-                showBottomLoader: false,
-                lastScroll: 0,
-                pointerDownY: 0
-            }
-        },
-        template: ` <div class="scroll"
-            @scroll="onScroll"
-            @touchstart="onPointerDown"
-            ref = "scrollContainer"
-            :style="{height: height + 'px'}"
-        >
-            <div  ref="toploader">
-                <loader :active="showTopLoader"> 刷新中...</loader>
-            </div>
-            <div  ref="scrollContent">
-                <slot></slot>
-            </div>
-            <div ref="bottomLoader">
-                <loader :active="showBottomLoader"> 加载中...</loader>
-            </div>`,
-        methods: {
-            onScroll(e, direction) {
-                const el = this.$refs.scrollContainer;
-                if (this.isLoading || !el) return;
-                const scrollDirection = Math.sign(this.lastScroll - el.scrollTop);
-                const displacement = el.scrollHeight - el.clientHeight - el.scrollTop;
-                const scrollTop = el.scrollTop;
-                if(direction && direction < 0 && scrollTop <=0){
-                    this.showTopLoader = true
-                    this.isLoading = true;
-                    this.onReachTop().then(_ => {
-                        this.showTopLoader = false
-                        this.isLoading = false;
-                    })
-
-                }
-                if (displacement <= 0) {
-                    this.showBottomLoader = true
-                    this.isLoading = true;
-                    this.onReachBottom().then(_ => {
-                        this.showBottomLoader = false
-                        this.isLoading = false;
-                    })
-                }
-            },
-            stretchEdge(e,direction){
-                this.onScroll(e,direction)
-            }
-            ,
-            onPointerDown(e) {
-                if (this.isLoading) return;
-                this.pointerDownY = e.touches[0].clientY;
-                this.$refs.scrollContainer.parentElement.addEventListener('touchmove', e => {
-                    e.stopPropagation();
-                    this.onPointerMove(e);
-                }, {passive: false, useCapture: true});
-            },
-            onPointerMove(e) {
-                let direction = Math.sign(this.pointerDownY - e.touches[0].clientY)
-                this.stretchEdge(e,direction)
-            },
-            onPointerUp() {
-                this.pointerDownY = undefined;
-            }
-        }
-    });
-    new Vue({
-        el: '#app',
-        data() {
-            return {
-                list: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-            }
-        },
-        methods: {
-            handleReachBottom() {
-                return new Promise(resolve => {
-                    setTimeout(() => {
-                        const last = this.list[this.list.length - 1];
-                        for (let i = 1; i < 11; i++) {
-                            this.list.push(last + i);
-                        }
-                        resolve(100);
-                    }, 2000);
-                });
-            },
-            handleReachTop(){
-                return new Promise(resolve => {
-                    setTimeout(() => {
-                            this.list = [1,2,3,4,5,6,7,8,9,10]
-                        resolve(100);
-                    }, 2000);
-                });
-            }
-        }
-    })
-</script>
 </html>
+<script src="https://www.topschool.com/js/jweixin-1.2.2.js"></script>
+<script src="./bundle.js"></script>
