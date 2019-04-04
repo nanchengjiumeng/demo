@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, minimal-ui" />
+    <title>Title</title>
+    <style>
+        html,body,ul,h1{
+            padding: 0;
+            margin: 0;
+        }
+        ul{
+            list-style: none;
+        }
+
+        .topic__list a{
+            display: block;
+            text-decoration: none;
+            color: #000;
+        }
+        .topic__list .topic__list__item{
+            position: relative;
+            padding: 10px 15px;
+            border-bottom: 1px solid #cccccc;
+        }
+        .topic__list  .section__l{
+            position: absolute;
+            padding: 0 15px 0 0;
+            width: 70px;
+            top: 0;
+            bottom: 0;
+        }
+        .topic__list  .section__l img{
+            display: block;
+            position: absolute;
+            height: 70px;
+            width: 70px;
+            top: 0;
+            bottom: 0;
+            margin: auto;
+        }
+
+
+        .topic__list  .section__r{
+            margin-left: 85px;
+        }
+
+        .topic__list  .section__r .topic__title{
+            /*margin: 15px 0;*/
+            font-size: 14px;
+            padding-left: 16px;
+            position: relative;
+        }
+        .topic__list  .section__r .topic__title .icon__sharp{
+            background:url("./img/logo.82b9c7a5.png");
+            -webkit-background-size: 14px 14px;
+            background-size: 14px 14px;
+            height: 14px;
+            width: 14px;
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            margin: auto;
+            font-size: 0;
+        }
+        .topic__list  .section__r .topic__des{
+            margin: 10px 0;
+            font-size: 12px;
+            color: #666666;
+            line-height: 1.6;
+        }
+
+
+    </style>
+</head>
+<body>
+<ul class="topic__list">
+</ul>
+</body>
+<script>
+    var list = [{
+        image: "./img/logo.82b9c7a5.png",
+        title: "这是一条标题",
+        des: "这是一段描述这是一段描述这是一段描述这是一段描述这是一段描述",
+        url:"www.baidu.com"
+    },{
+        image: "./img/logo.82b9c7a5.png",
+        title: "这是一条标题",
+        des: "这是一段描述这是一段描述这是一段描述这是一段描述这是一段描述",
+        url:"www.baidu.com"
+    }];
+
+    var topicList = document.querySelector(".topic__list");
+    list.forEach(function (item){
+        var image = item.image, title = item.title, des = item.des,url = item.url;
+        topicList.innerHTML +=('<li class="topic__list__item">' +
+'<a href="'+url+'">' +
+        '<div class="section__l">' +
+            '<img src="'+image+'" alt="loading">'+
+        '</div>'+
+        '<div class="section__r">'+
+            '<h1 class="topic__title"><span class="icon__sharp"></span>'+title+'</h1>'+
+            '<div class="topic__des">'+des+'</div>' +
+            '</div>'+
+        '</a>'+
+    '</li>');
+    })
+
+</script>
+</html>
+
